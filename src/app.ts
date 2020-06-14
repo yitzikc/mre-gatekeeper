@@ -56,7 +56,8 @@ export default class VRGateway {
 
 	private userMayEnter = (user: MRE.User) => {
 		// TODO: Optionally allow privileged entry to moderators
-		if (now() < this.entranceDeadline.unix()) {
+		const entranceDeadlineMs = 1000 * this.entranceDeadline.unix();
+		if (now() < entranceDeadlineMs) {
 			console.log("Allowing in timely user", user.name, user.id);
 			return true;
 		}
