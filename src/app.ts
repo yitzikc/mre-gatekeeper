@@ -1,4 +1,5 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
+import { Moment, utc, now, ISO_8601 } from 'moment';
 import { PersistentSet } from './persistent-set';
 
 // import { getParameterLastValue, getBooleanOption } from './parameter_set_util'
@@ -9,12 +10,16 @@ import { PersistentSet } from './persistent-set';
 export default class VRGateway {
 	private rootActor?: MRE.Actor = undefined;
 	private knownUserIds: PersistentSet<MRE.Guid>;
-	// private knownUserIds: Set<MRE.Guid> = new Set();
+	private readonly entranceDeadline: Moment;
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
+		// FIXME: get this from params
+		const entranceDeadlineIsoStr = "2020-06-14T10:00:30+01";
+
 		this.context.onStarted(() => this.started());
 		this.context.onUserJoined(user => this.onUserJoined(user));
 		this.knownUserIds = new PersistentSet<MRE.Guid>("user-ids", context.sessionId, MRE.parseGuid);
+		this.entranceDeadline = utc(entranceDeadlineIsoStr, ISO_8601);
 		return;
 	}
 
@@ -32,18 +37,41 @@ export default class VRGateway {
 	}
 
 	private async onUserJoined(user: MRE.User) {
-		const isKnown = this.knownUserIds.has(user.id);
-		const shouldAllowNew = true;
-		if (isKnown || shouldAllowNew) {
-			const welcome = isKnown ? "Welcome back" : "Welcome";
-			//const accepted = 
+		const allowedIn = this.userMayEnter(user);
+		if (allowedIn) {
+			const addedNow = this.knownUserIds.add(user.id);
+			const welcome = addedNow ? "Welcome" : "Welcome back";
 			await user.prompt(
 				`${welcome} ${user.name}! Please join us at the main meeting area.`, false);
 		}
-
-		if (shouldAllowNew) {
-			this.knownUserIds.add(user.id);
+		else {
+			await this.createBarrier();
+			await user.prompt(
+				`We apologize, ${user.name}, but the event is now in progress and we aren't allowing new people in. ` +
+				`Please use the browser link to register for our next event`);
 		}
+
 		return;
+	}
+
+	private userMayEnter = (user: MRE.User) => {
+		// TODO: Optionally allow privileged entry to moderators
+		if (now() < this.entranceDeadline.unix()) {
+			console.log("Allowing in timely user", user.name, user.id);
+			return true;
+		}
+		else if (this.knownUserIds.has(user.id)) {
+			console.log("Allowing in returning user", user.name, user.id);
+			return true;
+		}
+		else {
+			console.log("Declining entry for late user", user.name, user.id);
+		}
+
+		return false;
+	}
+
+	private async createBarrier() {
+		// TODO: Create a barrier to disallow entry
 	}
 }
