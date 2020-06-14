@@ -1,7 +1,5 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
-import { eachLine } from 'line-reader';
-import { appendFile } from 'fs';
-import { parseGuid } from '@microsoft/mixed-reality-extension-sdk';
+import { PersistentSet } from './persistent-set';
 
 // import { getParameterLastValue, getBooleanOption } from './parameter_set_util'
 
@@ -10,11 +8,13 @@ import { parseGuid } from '@microsoft/mixed-reality-extension-sdk';
  */
 export default class VRGateway {
 	private rootActor?: MRE.Actor = undefined;
-	private knownUserIds: Set<MRE.Guid> = new Set();
+	private knownUserIds: PersistentSet<MRE.Guid>;
+	// private knownUserIds: Set<MRE.Guid> = new Set();
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
 		this.context.onStarted(() => this.started());
 		this.context.onUserJoined(user => this.onUserJoined(user));
+		this.knownUserIds = new PersistentSet<MRE.Guid>("user-ids", context.sessionId, MRE.parseGuid);
 		return;
 	}
 
@@ -27,15 +27,8 @@ export default class VRGateway {
                 name: 'Root Actor',
             }
 		});
-
-		try {
-			eachLine('known_ids.txt', (l: string) => {
-				this.knownUserIds.add(parseGuid(l));
-			});
-		}
-		catch (e) {
-			console.log("Can't open file:", e);
-		}
+		
+		this.knownUserIds.load();
 	}
 
 	private async onUserJoined(user: MRE.User) {
@@ -48,15 +41,8 @@ export default class VRGateway {
 				`${welcome} ${user.name}! Please join us at the main meeting area.`, false);
 		}
 
-		if (! isKnown && shouldAllowNew) {
+		if (shouldAllowNew) {
 			this.knownUserIds.add(user.id);
-			appendFile('known_ids.txt', user.id, 'utf8',
-			// callback function
-			(err) => { 
-				if (err) throw err;
-				// if no error
-				console.log("Data is appended to file successfully.")
-			});
 		}
 		return;
 	}
