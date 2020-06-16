@@ -1,6 +1,7 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 import { Moment, utc, now, ISO_8601 } from 'moment';
 import { PersistentSet } from './persistent-set';
+import { getParameterLastValue } from './parameter_set_util';
 
 // import { getParameterLastValue, getBooleanOption } from './parameter_set_util'
 
@@ -14,8 +15,7 @@ export default class VRGateway {
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
 		// FIXME: get this from params
-		const entranceDeadlineIsoStr = "2020-06-14T10:00:30+01";
-
+		const entranceDeadlineIsoStr = getParameterLastValue(params, "ed").replace(" ", "+");
 		this.context.onStarted(() => this.started());
 		this.context.onUserJoined(user => this.onUserJoined(user));
 		this.knownUserIds = new PersistentSet<MRE.Guid>("user-ids", context.sessionId, MRE.parseGuid);
