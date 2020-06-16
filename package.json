@@ -1,6 +1,9 @@
 {
   "name": "mre-gatekeeper",
   "version": "0.0.1",
+  "engines": {
+    "node": "14.x"
+  },
   "description": "MRE Access manager",
   "main": "build/server.js",
   "scripts": {
