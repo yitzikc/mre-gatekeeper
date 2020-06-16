@@ -11,6 +11,8 @@ import { getParameterLastValue } from './parameter_set_util';
 export default class VRGateway {
 	private rootActor?: MRE.Actor = undefined;
 	private knownUserIds: PersistentSet<MRE.Guid>;
+	private assets: MRE.AssetContainer;
+	private barrierAsset?: MRE.Asset = undefined;
 	private readonly entranceDeadline: Moment;
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
@@ -19,6 +21,7 @@ export default class VRGateway {
 		this.context.onStarted(() => this.started());
 		this.context.onUserJoined(user => this.onUserJoined(user));
 		this.knownUserIds = new PersistentSet<MRE.Guid>("user-ids", context.sessionId, MRE.parseGuid);
+		this.assets = new MRE.AssetContainer(context);
 		this.entranceDeadline = utc(entranceDeadlineIsoStr, ISO_8601);
 		return;
 	}
@@ -34,6 +37,10 @@ export default class VRGateway {
 		});
 		
 		this.knownUserIds.load();
+
+		// Create a fixed size 1x1 square, to be used as barrier.
+		// To adjust its size in actual use, use the scale parameter in World Editor.
+		this.barrierAsset = this.assets.createBoxMesh("barrier", 1, 1, 0.01);
 	}
 
 	private async onUserJoined(user: MRE.User) {
@@ -45,7 +52,7 @@ export default class VRGateway {
 				`${welcome} ${user.name}! Please join us at the main meeting area.`, false);
 		}
 		else {
-			await this.createBarrier();
+			this.createBarrier(user);
 			await user.prompt(
 				`We apologize, ${user.name}, but the event is now in progress and we aren't allowing new people in. ` +
 				`Please use the browser link to register for our next event`);
@@ -72,7 +79,33 @@ export default class VRGateway {
 		return false;
 	}
 
-	private async createBarrier() {
-		// TODO: Create a barrier to disallow entry
+	private createBarrier(user: MRE.User) {
+		MRE.Actor.Create(this.context, {
+			actor: {
+				name: `barrier to ${user.name} ${user.id}`,
+				parentId: this.rootActor!.id,
+				exclusiveToUser: user.id,
+				appearance: { meshId: this.barrierAsset!.id },
+				collider: {
+					enabled: true,
+					geometry: {
+						shape: MRE.ColliderType.Auto
+					},
+					layer: MRE.CollisionLayer.Navigation,
+					isTrigger: false,
+				},
+				rigidBody: {
+					enabled: true,
+					useGravity: false,
+					isKinematic: true,
+				},
+				transform: {
+					app: {
+						position: { x: 0, y: 0, z: 0 },
+					}
+				}
+			}
+		});
+		return;
 	}
 }
