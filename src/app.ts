@@ -46,7 +46,7 @@ export default class VRGateway {
 		this.barrierColor = this.assets.createMaterial(
 			"translucent Burgundy", {
 				color: {
-					a: 128 / 255,
+					a: 64 / 255,
 					r: 1,
 					g: 0,
 					b: 102 / 255
