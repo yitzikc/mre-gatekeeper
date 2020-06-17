@@ -13,6 +13,7 @@ export default class VRGateway {
 	private knownUserIds: PersistentSet<MRE.Guid>;
 	private assets: MRE.AssetContainer;
 	private barrierAsset?: MRE.Asset = undefined;
+	private barrierColor?: MRE.Material;
 	private readonly entranceDeadline: Moment;
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
@@ -41,6 +42,18 @@ export default class VRGateway {
 		// Create a fixed size 1x1 square, to be used as barrier.
 		// To adjust its size in actual use, use the scale parameter in World Editor.
 		this.barrierAsset = this.assets.createBoxMesh("barrier", 1, 1, 0.01);
+		// TODO: Allow the RGBA code to be passed as an argument
+		this.barrierColor = this.assets.createMaterial(
+			"translucent Burgundy", {
+				color: {
+					a: 128 / 255,
+					r: 1,
+					g: 0,
+					b: 102 / 255
+				},
+				alphaMode: MRE.AlphaMode.Blend,
+			}
+		);
 	}
 
 	private async onUserJoined(user: MRE.User) {
@@ -85,7 +98,10 @@ export default class VRGateway {
 				name: `barrier to ${user.name} ${user.id}`,
 				parentId: this.rootActor!.id,
 				exclusiveToUser: user.id,
-				appearance: { meshId: this.barrierAsset!.id },
+				appearance: {
+					meshId: this.barrierAsset!.id,
+					materialId: this.barrierColor!.id,
+				},
 				collider: {
 					enabled: true,
 					geometry: {
