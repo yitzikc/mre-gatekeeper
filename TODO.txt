@@ -1,0 +1,5 @@
+• The memory of who entered is lost when there's no one in the space, on the deployed version. It's not creating the file where this should be retained. This works fine in my local development, need to see what's wrong.
+• Log a distinct message when a returning user is allowed in. This means evaluating first the criterion for returning user, and then for timely user.
+• The colour of the curtain should be specified in MRE parameters as an RGBA hex string.
+• The messages we display the users should be customizable using message files (in the format shown here: https://phrase.com/blog/posts/step-step-guide-javascript-localization/, but server-side).
+• Add a readme to explain what this project is about, similar for the one we have for the timer.
