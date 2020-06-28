@@ -1,3 +1,2 @@
-• The colour of the curtain should be specified in MRE parameters as an RGBA hex string.
 • The messages we display the users should be customizable using message files (in the format shown here: https://phrase.com/blog/posts/step-step-guide-javascript-localization/, but server-side).
 • Add a readme to explain what this project is about, similar for the one we have for the timer.

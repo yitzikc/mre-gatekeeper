@@ -1,7 +1,8 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 import { Moment, utc, now, ISO_8601 } from 'moment';
 import { PersistentSet } from './persistent-set';
-import { getParameterLastValue } from './parameter_set_util';
+import { getParameterLastValue, getColorOption } from './parameter_set_util';
+import { Color4 } from '@microsoft/mixed-reality-extension-sdk';
 
 // import { getParameterLastValue, getBooleanOption } from './parameter_set_util'
 
@@ -12,8 +13,9 @@ export default class VRGateway {
 	private rootActor?: MRE.Actor = undefined;
 	private knownUserIds: PersistentSet<MRE.Guid>;
 	private assets: MRE.AssetContainer;
+	private readonly barrierColor: MRE.Color4;
 	private barrierAsset?: MRE.Asset = undefined;
-	private barrierColor?: MRE.Material;
+	private barrierMaterial?: MRE.Material;
 	private readonly entranceDeadline: Moment;
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
@@ -24,6 +26,9 @@ export default class VRGateway {
 		this.knownUserIds = new PersistentSet<MRE.Guid>("user-ids", context.sessionId, MRE.parseGuid);
 		this.assets = new MRE.AssetContainer(context);
 		this.entranceDeadline = utc(entranceDeadlineIsoStr, ISO_8601);
+		const colorParamValue = getColorOption(
+			params, "c", Color4.FromInts(128, 128, 128, 255));
+		this.barrierColor = this.toColor4(colorParamValue);
 		return;
 	}
 
@@ -43,15 +48,10 @@ export default class VRGateway {
 		// To adjust its size in actual use, use the scale parameter in World Editor.
 		this.barrierAsset = this.assets.createBoxMesh("barrier", 1, 1, 0.01);
 		// TODO: Allow the RGBA code to be passed as an argument
-		this.barrierColor = this.assets.createMaterial(
-			"translucent Burgundy", {
-				color: {
-					a: 64 / 255,
-					r: 1,
-					g: 0,
-					b: 102 / 255
-				},
-				alphaMode: MRE.AlphaMode.Blend,
+		this.barrierMaterial = this.assets.createMaterial(
+			"barrier material", {
+				color: this.barrierColor,
+				alphaMode: MRE.AlphaMode.Blend
 			}
 		);
 	}
@@ -105,7 +105,7 @@ export default class VRGateway {
 				exclusiveToUser: user.id,
 				appearance: {
 					meshId: this.barrierAsset!.id,
-					materialId: this.barrierColor!.id,
+					materialId: this.barrierMaterial!.id,
 				},
 				collider: {
 					enabled: true,
@@ -128,5 +128,13 @@ export default class VRGateway {
 			}
 		});
 		return;
+	}
+
+	private toColor4 = (color: MRE.Color3|MRE.Color4): MRE.Color4 => {
+		if (color instanceof MRE.Color3) {
+			return MRE.Color4.FromColor3(color);
+		}
+
+		return color;
 	}
 }
