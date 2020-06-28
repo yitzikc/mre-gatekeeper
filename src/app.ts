@@ -76,17 +76,21 @@ export default class VRGateway {
 
 	private userMayEnter = (user: MRE.User) => {
 		// TODO: Optionally allow privileged entry to moderators
-		const entranceDeadlineMs = 1000 * this.entranceDeadline.unix();
-		if (now() < entranceDeadlineMs) {
-			console.log("Allowing in timely user", user.name, user.id);
-			return true;
-		}
-		else if (this.knownUserIds.has(user.id)) {
+		// NOTE: The format of the log messages should be retained, as
+		// the applogs2csv.ts utility expects it.
+		if (this.knownUserIds.has(user.id)) {
 			console.log("Allowing in returning user", user.name, user.id);
 			return true;
 		}
 		else {
-			console.log("Declining entry for late user", user.name, user.id);
+			const entranceDeadlineMs = 1000 * this.entranceDeadline.unix();
+			if (now() < entranceDeadlineMs) {
+				console.log("Allowing in timely user", user.name, user.id);
+				return true;
+			}
+			else {
+				console.log("Declining entry for late user", user.name, user.id);
+			}
 		}
 
 		return false;
