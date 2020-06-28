@@ -68,7 +68,8 @@ export default class VRGateway {
 			this.createBarrier(user);
 			await user.prompt(
 				`We apologize, ${user.name}, but the event is now in progress and we aren't allowing new people in. ` +
-				`Please use the browser link behind you to register for our next event`);
+				`Please use the browser link behind you to register for our next event. We'd love to see you then!`,
+				false);
 		}
 
 		return;
