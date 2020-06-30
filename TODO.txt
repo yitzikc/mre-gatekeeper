@@ -1,1 +1,3 @@
 • The messages we display the users should be customizable using message files (in the format shown here: https://phrase.com/blog/posts/step-step-guide-javascript-localization/, but server-side).
+• When the color hex-code passed to the MRE is invalid, this results in erratic behavior. Notably, onStarted would not be called,
+leading to errors in onUserJoined.
