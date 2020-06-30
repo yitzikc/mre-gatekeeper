@@ -11,8 +11,9 @@ function main()  {
     console.log("time,decision,arrival,name,guid");
     eachLine(inFile, (line) => {
         const parsed = parseLine(line);
+        const arrival = parsed.arrival || "";
         if (parsed != undefined) {
-            console.log(`${parsed.ts},${parsed.decision},${parsed.arrival},"${parsed.name}",${parsed.guid}`);
+            console.log(`${parsed.ts},${parsed.decision},${arrival},"${parsed.name}",${parsed.guid}`);
         }
     });
     return;
@@ -21,7 +22,7 @@ function main()  {
 function parseLine(line: string): any {
     const tokens = line.split(" ");
     const decision = tokens[2].toLowerCase();
-    if (! ["allowing", "declining"].includes(decision)) {
+    if (! ["allowing", "declining", "parting"].includes(decision)) {
         return undefined;
     }
     const nTokens = tokens.length;
@@ -30,10 +31,11 @@ function parseLine(line: string): any {
         return undefined;
     }
 
+    const beforeUser = tokens[userPos - 1].toLowerCase();
     return {
         ts: tokens[0],
         decision: decision,
-        arrival: tokens[userPos - 1],
+        arrival: (beforeUser != "from") ? beforeUser : null,
         name: tokens.slice(userPos+1, nTokens-1).join(" "),
         guid: tokens[nTokens - 1]
     }

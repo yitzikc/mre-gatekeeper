@@ -23,6 +23,7 @@ export default class VRGateway {
 		const entranceDeadlineIsoStr = getParameterLastValue(params, "ed").replace(" ", "+");
 		this.context.onStarted(() => this.started());
 		this.context.onUserJoined(user => this.onUserJoined(user));
+		this.context.onUserLeft(user => this.onUserLeft(user));
 		this.knownUserIds = new PersistentSet<MRE.Guid>("user-ids", context.sessionId, MRE.parseGuid);
 		this.assets = new MRE.AssetContainer(context);
 		this.entranceDeadline = utc(entranceDeadlineIsoStr, ISO_8601);
@@ -72,6 +73,11 @@ export default class VRGateway {
 				false);
 		}
 
+		return;
+	}
+
+	private async onUserLeft(user: MRE.User) {
+		console.log("Parting from user", user.name, user.id);
 		return;
 	}
 
