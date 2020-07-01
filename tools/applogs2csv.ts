@@ -11,8 +11,8 @@ function main()  {
     console.log("time,decision,arrival,name,guid");
     eachLine(inFile, (line) => {
         const parsed = parseLine(line);
-        const arrival = parsed.arrival || "";
         if (parsed != undefined) {
+            const arrival = parsed.arrival || "";
             console.log(`${parsed.ts},${parsed.decision},${arrival},"${parsed.name}",${parsed.guid}`);
         }
     });
