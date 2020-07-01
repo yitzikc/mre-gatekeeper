@@ -1,0 +1,5 @@
+# Requirements file for Python scripts
+# Install using:
+# pip3 install requirements-py.txt
+
+pandas>=1.0
