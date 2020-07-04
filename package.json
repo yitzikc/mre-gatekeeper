@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/i18n": "^0.8.6",
     "@types/line-reader": "0.0.29",
     "@types/moment": "^2.13.0",
     "@types/restify": "^8.4.2",
@@ -27,6 +28,7 @@
   "dependencies": {
     "@microsoft/mixed-reality-extension-sdk": "^0.18.1",
     "dotenv": "^8.2.0",
+    "i18n": "^0.10.0",
     "line-reader": "^0.4.0",
     "moment": "^2.26.0"
   }

@@ -1,5 +1,7 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 import { Moment, utc, now, ISO_8601 } from 'moment';
+import { resolve as resolvePath } from 'path';
+import { configure as i18nConfigure, __ } from 'i18n';
 import { PersistentSet } from './persistent-set';
 import { getParameterLastValue, getColorOption } from './parameter_set_util';
 import { Color4 } from '@microsoft/mixed-reality-extension-sdk';
@@ -30,6 +32,7 @@ export default class VRGateway {
 		const colorParamValue = getColorOption(
 			params, "c", Color4.FromInts(128, 128, 128, 255));
 		this.barrierColor = this.toColor4(colorParamValue);
+		this.initMessages();
 		return;
 	}
 
@@ -61,15 +64,14 @@ export default class VRGateway {
 		const allowedIn = this.userMayEnter(user);
 		if (allowedIn) {
 			const addedNow = this.knownUserIds.add(user.id);
-			const welcome = addedNow ? "Welcome" : "Welcome back";
+			const welcomeMsg = addedNow ? "Welcome %s" : "Welcome back %s";
 			await user.prompt(
-				`${welcome} ${user.name}! Please join us at the main meeting area.`, false);
+				__(welcomeMsg, user.name), false);
 		}
 		else {
 			this.createBarrier(user);
 			await user.prompt(
-				`We apologize, ${user.name}, but the event is now in progress and we aren't allowing new people in. ` +
-				`Please use the browser link behind you to register for our next event. We'd love to see you then!`,
+				__("You're late %s", user.name),
 				false);
 		}
 
@@ -142,5 +144,17 @@ export default class VRGateway {
 		}
 
 		return color;
+	}
+
+	private initMessages = () => {
+		i18nConfigure({
+			locales: ['en'],
+			defaultLocale: 'en',
+			queryParameter: 'lang',
+			directory: resolvePath(__dirname, '../locales'),
+			api: {
+			  '__': 'translate' 
+			},
+		});
 	}
 }
