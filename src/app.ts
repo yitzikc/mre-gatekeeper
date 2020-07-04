@@ -4,9 +4,6 @@ import { resolve as resolvePath } from 'path';
 import { configure as i18nConfigure, __ } from 'i18n';
 import { PersistentSet } from './persistent-set';
 import { getParameterLastValue, getColorOption } from './parameter_set_util';
-import { Color4 } from '@microsoft/mixed-reality-extension-sdk';
-
-// import { getParameterLastValue, getBooleanOption } from './parameter_set_util'
 
 /**
  * The main class of this app. All the logic goes here.
@@ -21,7 +18,6 @@ export default class VRGateway {
 	private readonly entranceDeadline: Moment;
 
 	constructor(private context: MRE.Context, private params: MRE.ParameterSet, private baseUrl: string) {
-		// FIXME: get this from params
 		const entranceDeadlineIsoStr = getParameterLastValue(params, "ed").replace(" ", "+");
 		this.context.onStarted(() => this.started());
 		this.context.onUserJoined(user => this.onUserJoined(user));
@@ -30,7 +26,7 @@ export default class VRGateway {
 		this.assets = new MRE.AssetContainer(context);
 		this.entranceDeadline = utc(entranceDeadlineIsoStr, ISO_8601);
 		const colorParamValue = getColorOption(
-			params, "c", Color4.FromInts(128, 128, 128, 255));
+			params, "c", MRE.Color4.FromInts(128, 128, 128, 255));
 		this.barrierColor = this.toColor4(colorParamValue);
 		this.initMessages();
 		return;
@@ -51,7 +47,6 @@ export default class VRGateway {
 		// Create a fixed size 1x1 square, to be used as barrier.
 		// To adjust its size in actual use, use the scale parameter in World Editor.
 		this.barrierAsset = this.assets.createBoxMesh("barrier", 1, 1, 0.01);
-		// TODO: Allow the RGBA code to be passed as an argument
 		this.barrierMaterial = this.assets.createMaterial(
 			"barrier material", {
 				color: this.barrierColor,
