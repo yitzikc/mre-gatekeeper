@@ -1,7 +1,10 @@
 import * as MRE from '@microsoft/mixed-reality-extension-sdk';
 import { Moment, utc, now, ISO_8601 } from 'moment';
 import { resolve as resolvePath } from 'path';
-import { configure as i18nConfigure, __ } from 'i18n';
+//import * as i18next from 'i18next';
+import { default as i18next } from 'i18next';
+const FSBackend = require('i18next-fs-backend');
+
 import { PersistentSet } from './persistent-set';
 import { getParameterLastValue, getColorOption } from './parameter_set_util';
 
@@ -28,7 +31,6 @@ export default class VRGateway {
 		const colorParamValue = getColorOption(
 			params, "c", MRE.Color4.FromInts(128, 128, 128, 255));
 		this.barrierColor = this.toColor4(colorParamValue);
-		this.initMessages();
 		return;
 	}
 
@@ -36,6 +38,7 @@ export default class VRGateway {
 	 * Once the context is "started", initialize the app.
 	 */
 	private async started() {
+		await this.initMessages();
 		this.rootActor = MRE.Actor.Create(this.context, {
             actor: {
                 name: 'Root Actor',
@@ -57,16 +60,17 @@ export default class VRGateway {
 
 	private async onUserJoined(user: MRE.User) {
 		const allowedIn = this.userMayEnter(user);
+		const msgArgs = { name: user.name };
 		if (allowedIn) {
 			const addedNow = this.knownUserIds.add(user.id);
-			const welcomeMsg = addedNow ? "Welcome %s" : "Welcome back %s";
+			const welcomeMsg = addedNow ? "Welcome" : "Welcome back";
 			await user.prompt(
-				__(welcomeMsg, user.name), false);
+				i18next.t(welcomeMsg, msgArgs), false);
 		}
 		else {
 			this.createBarrier(user);
 			await user.prompt(
-				__("You're late %s", user.name),
+				i18next.t("You're late", msgArgs),
 				false);
 		}
 
@@ -141,15 +145,14 @@ export default class VRGateway {
 		return color;
 	}
 
-	private initMessages = () => {
-		i18nConfigure({
-			locales: ['en'],
-			defaultLocale: 'en',
-			queryParameter: 'lang',
-			directory: resolvePath(__dirname, '../locales'),
-			api: {
-			  '__': 'translate' 
-			},
-		});
+	private async initMessages() {
+		await i18next.use(FSBackend).init({
+			initImmediate: true,
+			fallbackLng: 'en',
+			lng: 'en',
+			backend: {
+				loadPath: resolvePath(__dirname, '../locales/{{lng}}.json')
+			}
+		})
 	}
 }

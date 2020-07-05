@@ -1,6 +1,5 @@
 {
-    "Welcome %s": "Welcome %s! Please join us at the main meeting area.",
-    "Welcome back %s": "Welcome back %s! Please join us at the main meeting area.",
-    "You're late %s": "We apologize, %s, but the event is now in progress and we aren't allowing new people in. Please use the browser link behind you to register for our next event. We'd love to see you then!"
- }
- 
+    "Welcome": "Welcome {{name}}! Please join us at the main meeting area.",
+    "Welcome back": "Welcome back {{name}}! Please join us at the main meeting area.",
+    "You're late": "We apologize, {{name}}, but the event is now in progress and we aren't allowing new people in. Please use the browser link behind you to register for our next event. We'd love to see you then!"
+}
