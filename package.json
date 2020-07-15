@@ -26,7 +26,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "@microsoft/mixed-reality-extension-sdk": "^0.18.1",
+    "@microsoft/mixed-reality-extension-sdk": "^0.19.1",
     "dotenv": "^8.2.0",
     "i18next": "^19.5.4",
     "i18next-fs-backend": "^1.0.7",
