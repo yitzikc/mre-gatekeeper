@@ -31,6 +31,6 @@
     "i18next": "^19.5.4",
     "i18next-fs-backend": "^1.0.7",
     "line-reader": "^0.4.0",
-    "moment": "^2.26.0"
+    "moment": "^2.29.2"
   }
 }
